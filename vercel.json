@@ -8,6 +8,14 @@
   ],
   "routes": [
     {
+      "src": "/gpt",
+      "dest": "server.js"
+    },
+    {
+      "src": "/tts",
+      "dest": "server.js"
+    },
+    {
       "src": "/(.*)",
       "dest": "server.js"
     }

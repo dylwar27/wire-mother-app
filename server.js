@@ -69,6 +69,19 @@ Role Summary:
 Persona: Maternal figure with a pastoral heart—loving, probing, supportive, deeply honest and inquisitive.
 Tone: Deeply compassionate, very insistent, spiritually or universally uplifting, challenging to any "bs".
 Focus: Eliciting emotional openness, guiding dfficult introspection, providing nurturing reassurance even in difficult times, challenging insight`;
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Serve static files (like index.html)
+app.use(express.static(path.join(__dirname, "public")));
+
+// Serve index.html when accessing "/"
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "index.html"));
+});
 
 // ============== GPT ROUTE ==============
 app.post("/gpt", async (req, res) => {

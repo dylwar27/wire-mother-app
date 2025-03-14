@@ -155,10 +155,4 @@ app.post("/tts", async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Wire Mother server running on port ${PORT}`);
-  console.log("OpenAI key is:", OPENAI_API_KEY);
-  console.log("ElevenLabs key is:", ELEVENLABS_API_KEY);
-  console.log("ElevenLabs Voice ID:", ELEVENLABS_VOICE_ID);
-});
+export default app;

@@ -7,17 +7,7 @@
     }
   ],
   "routes": [
-    {
-      "src": "/gpt",
-      "dest": "/server.js"
-    },
-    {
-      "src": "/tts",
-      "dest": "/server.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/server.js"
-    }
+    { "src": "/api/gpt", "dest": "/server.js" },
+    { "src": "/api/tts", "dest": "/server.js" }
   ]
 }

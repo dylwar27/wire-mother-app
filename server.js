@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 
+// Load environment variables from .env file
 dotenv.config();
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
@@ -92,8 +93,11 @@ app.post("/api/tts", async (req, res) => {
         text: text,
         model_id: "eleven_monolingual_v1",
         voice_settings: {
-          stability: 0.5,
-          similarity_boost: 0.8
+          "stability": 0.39,
+          "similarity_boost": 0.36,
+          "style": 0.15,
+          "use_speaker_boost": true,
+          "speed": 0.82
         }
       })
     });
@@ -104,6 +108,7 @@ app.post("/api/tts", async (req, res) => {
       return res.status(500).json({ error: "TTS API Error" });
     }
 
+    // Stream audio back to the client
     const audioArrayBuffer = await ttsResponse.arrayBuffer();
     res.setHeader("Content-Type", "audio/mpeg");
     res.send(Buffer.from(audioArrayBuffer));
@@ -114,3 +119,11 @@ app.post("/api/tts", async (req, res) => {
 });
 
 export default app;
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Wire Mother server running on port ${PORT}`);
+  console.log("OpenAI key is:", process.env.OPENAI_API_KEY ? "Set correctly" : "Missing");
+  console.log("ElevenLabs key is:", process.env.ELEVENLABS_API_KEY ? "Set correctly" : "Missing");
+  console.log("ElevenLabs Voice ID:", process.env.ELEVENLABS_VOICE_ID ? "Set correctly" : "Missing");
+});

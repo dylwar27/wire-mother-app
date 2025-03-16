@@ -81,9 +81,9 @@ app.post("/api/tts", async (req, res) => {
         voice_settings: {
           "stability": 0.33,
           "similarity_boost": 0.80,
-          "style": 0.95,
+          "style": 0.75,
           "use_speaker_boost": true,
-          "speed": 1.03,
+          "speed": 1.13,
         }
       })
     });

@@ -7,9 +7,9 @@
     }
   ],
   "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "server.js"
-    }
+    { "src": "/api/gpt", "dest": "/server.js" },
+    { "src": "/api/tts", "dest": "/server.js" },
+    { "src": "/assets/(.*)", "dest": "/public/assets/$1" },
+    { "src": "/(.*)", "dest": "/server.js" }
   ]
 }

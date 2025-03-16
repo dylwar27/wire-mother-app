@@ -1,6 +1,6 @@
 'use client';
 
-import {useEffect, useRef, useState} from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 
 // Define types for Web Speech API
 interface SpeechRecognition extends EventTarget {
@@ -47,6 +47,7 @@ export default function Home() {
     const [isLoading, setIsLoading] = useState(false);
     const chatContainerRef = useRef<HTMLDivElement>(null);
     const recognitionRef = useRef<SpeechRecognition | null>(null);
+    const initialMessageShownRef = useRef(false);
 
     // Add message to chat
     const addMessage = (text: string, isUser: boolean, isError = false) => {
@@ -54,7 +55,7 @@ export default function Home() {
     };
 
     // Get response from GPT API
-    const getGPTResponse = async (userText: string) => {
+    const getGPTResponse = useCallback(async (userText: string) => {
         try {
             setStatus("Thinking...");
             setIsLoading(true);
@@ -84,7 +85,16 @@ export default function Home() {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        // Only add the initial message once
+        if (!initialMessageShownRef.current) {
+            // Add initial message
+            addMessage("Wire Mother is ready. Click 'Start Talking' or use 'Text Mode' to begin.", false);
+            initialMessageShownRef.current = true;
+        }
+    }, []);
 
     useEffect(() => {
         // Initialize speech recognition if available in browser
@@ -127,9 +137,6 @@ export default function Home() {
                 setIsTextMode(true);
             }
         }
-
-        // Add initial message
-        addMessage("Wire Mother is ready. Click 'Start Talking' or use 'Text Mode' to begin.", false);
     }, [getGPTResponse]);
 
     // Scroll to bottom when messages update

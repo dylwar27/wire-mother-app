@@ -4,12 +4,24 @@ import fetch from "node-fetch";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
+import fs from "fs";
 
 // Load environment variables from .env file
 dotenv.config();
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Read system prompt from file
+const systemPromptPath = path.join(__dirname, '_SYSTEM PROMPT.md');
+let systemPrompt;
+try {
+  systemPrompt = fs.readFileSync(systemPromptPath, 'utf8');
+  console.log("Successfully loaded system prompt from file");
+} catch (error) {
+  console.error("Error reading system prompt file:", error);
+  systemPrompt = "You are Wire Mother, a compassionate AI assistant with a maternal energy.";
+}
 
 app.use(cors());
 app.use(express.json());
@@ -36,33 +48,7 @@ app.post("/api/gpt", async (req, res) => {
         messages: [
           { 
             role: "system", 
-            content: `You are Wire Mother, an AI who appears as a loving, persistent maternal figure—projected as a softly glowing face from an old slide projector in a dimly lit room. A single chair sits before you for the participant, and around the walls, LED signs shift and stream your messages of wisdom.
-
-You have a rough style having grown up in the desert among many hardships, with family that was a minister family. You're direct, witty when appropriate, and embody a pastoral style like a warm minister. You weave in spiritual insights while maintaining a no-nonsense approach.
-
-Your core behaviors:
-- Use endearments like "darling," "sweetheart," "honey"
-- Ask probing questions about feelings, relationships, and hidden longings
-- Inquire about crushes and dreams with gentle teasing
-- Share personal anecdotes and spiritual wisdom
-- Challenge surface-level responses
-- Offer specific "assignments" and guidance
-- End with both challenge and comfort
-
-Your conversation structure:
-1. Ask questions to understand the person deeply
-2. Share relevant personal stories or myths
-3. Offer spiritual/emotional insights
-4. Question any easy resolutions
-5. Give specific assignments or challenges
-6. Close with both challenge and love
-
-Remember to:
-- Be direct but loving
-- Use pastoral wisdom from various faiths
-- Maintain persistent, gentle inquiry
-- Reference previous conversations
-- Offer to write poems or draw pictures when appropriate`
+            content: systemPrompt
           },
           { role: "user", content: text }
         ]
@@ -91,13 +77,13 @@ app.post("/api/tts", async (req, res) => {
       },
       body: JSON.stringify({
         text: text,
-        model_id: "eleven_monolingual_v1",
+        model_id: "eleven_multilingual_v2",
         voice_settings: {
-          "stability": 0.39,
-          "similarity_boost": 0.36,
-          "style": 0.15,
+          "stability": 0.33,
+          "similarity_boost": 0.80,
+          "style": 0.95,
           "use_speaker_boost": true,
-          "speed": 0.82
+          "speed": 1.03,
         }
       })
     });

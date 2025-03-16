@@ -2,6 +2,42 @@
 
 import {useEffect, useRef, useState} from 'react';
 
+// Define types for Web Speech API
+interface SpeechRecognition extends EventTarget {
+    lang: string;
+    continuous: boolean;
+    interimResults: boolean;
+    start: () => void;
+    stop: () => void;
+    onresult: (event: SpeechRecognitionEvent) => void;
+    onerror: (event: SpeechRecognitionErrorEvent) => void;
+    onstart: () => void;
+    onend: () => void;
+}
+
+interface SpeechRecognitionEvent {
+    results: {
+        [index: number]: {
+            [index: number]: {
+                transcript: string;
+            };
+        };
+    };
+}
+
+interface SpeechRecognitionErrorEvent {
+    error: string;
+}
+
+interface Window {
+    SpeechRecognition?: {
+        new(): SpeechRecognition;
+    };
+    webkitSpeechRecognition?: {
+        new(): SpeechRecognition;
+    };
+}
+
 export default function Home() {
     const [messages, setMessages] = useState<{ text: string, isUser: boolean, isError?: boolean }[]>([]);
     const [status, setStatus] = useState('');
@@ -10,59 +46,7 @@ export default function Home() {
     const [userInput, setUserInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const chatContainerRef = useRef<HTMLDivElement>(null);
-    const recognitionRef = useRef<any>(null);
-
-    useEffect(() => {
-        // Initialize speech recognition if available in browser
-        if (typeof window !== 'undefined') {
-            const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-
-            if (SpeechRecognition) {
-                recognitionRef.current = new SpeechRecognition();
-                recognitionRef.current.lang = 'en-US';
-                recognitionRef.current.continuous = false;
-                recognitionRef.current.interimResults = false;
-
-                recognitionRef.current.onresult = (event: any) => {
-                    const userInput = event.results[0][0].transcript;
-                    console.log("Speech recognized:", userInput);
-                    addMessage(userInput, true);
-                    getGPTResponse(userInput);
-                };
-
-                recognitionRef.current.onerror = (event: any) => {
-                    console.error("Speech recognition error:", event.error);
-                    addMessage(`Speech recognition error: ${event.error}`, false, true);
-                };
-
-                recognitionRef.current.onstart = () => {
-                    console.log("Speech recognition started");
-                    setIsListening(true);
-                    setStatus("Listening... Speak now");
-                };
-
-                recognitionRef.current.onend = () => {
-                    console.log("Speech recognition ended");
-                    setIsListening(false);
-                    setStatus("Speech recognition stopped");
-                };
-            } else {
-                console.error("Speech Recognition API not available");
-                addMessage("Speech recognition is not supported in your browser. Please use the text input option instead.", false, true);
-                setIsTextMode(true);
-            }
-        }
-
-        // Add initial message
-        addMessage("Wire Mother is ready. Click 'Start Talking' or use 'Text Mode' to begin.", false);
-    }, []);
-
-    // Scroll to bottom when messages update
-    useEffect(() => {
-        if (chatContainerRef.current) {
-            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-        }
-    }, [messages]);
+    const recognitionRef = useRef<SpeechRecognition | null>(null);
 
     // Add message to chat
     const addMessage = (text: string, isUser: boolean, isError = false) => {
@@ -92,14 +76,68 @@ export default function Home() {
             setStatus("Playing audio response...");
             await playTTS(data.response);
             setStatus("");
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Error in getGPTResponse:", error);
             setStatus("");
-            addMessage(`Error: ${error.message || "There was an error processing your request."}`, false, true);
+            const errorMessage = error instanceof Error ? error.message : "There was an error processing your request.";
+            addMessage(`Error: ${errorMessage}`, false, true);
         } finally {
             setIsLoading(false);
         }
     };
+
+    useEffect(() => {
+        // Initialize speech recognition if available in browser
+        if (typeof window !== 'undefined') {
+            const SpeechRecognition = (window as unknown as Window).SpeechRecognition ||
+                (window as unknown as Window).webkitSpeechRecognition;
+
+            if (SpeechRecognition) {
+                recognitionRef.current = new SpeechRecognition();
+                recognitionRef.current.lang = 'en-US';
+                recognitionRef.current.continuous = false;
+                recognitionRef.current.interimResults = false;
+
+                recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
+                    const userInput = event.results[0][0].transcript;
+                    console.log("Speech recognized:", userInput);
+                    addMessage(userInput, true);
+                    getGPTResponse(userInput);
+                };
+
+                recognitionRef.current.onerror = (event: SpeechRecognitionErrorEvent) => {
+                    console.error("Speech recognition error:", event.error);
+                    addMessage(`Speech recognition error: ${event.error}`, false, true);
+                };
+
+                recognitionRef.current.onstart = () => {
+                    console.log("Speech recognition started");
+                    setIsListening(true);
+                    setStatus("Listening... Speak now");
+                };
+
+                recognitionRef.current.onend = () => {
+                    console.log("Speech recognition ended");
+                    setIsListening(false);
+                    setStatus("Speech recognition stopped");
+                };
+            } else {
+                console.error("Speech Recognition API not available");
+                addMessage("Speech recognition is not supported in your browser. Please use the text input option instead.", false, true);
+                setIsTextMode(true);
+            }
+        }
+
+        // Add initial message
+        addMessage("Wire Mother is ready. Click 'Start Talking' or use 'Text Mode' to begin.", false);
+    }, [getGPTResponse]);
+
+    // Scroll to bottom when messages update
+    useEffect(() => {
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        }
+    }, [messages]);
 
     // Play TTS audio
     const playTTS = async (text: string) => {
@@ -141,9 +179,10 @@ export default function Home() {
                     reject(err);
                 });
             });
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Error in playTTS:", error);
-            addMessage(`Audio error: ${error.message || "There was an error playing the audio."}`, false, true);
+            const errorMessage = error instanceof Error ? error.message : "There was an error playing the audio.";
+            addMessage(`Audio error: ${errorMessage}`, false, true);
             throw error;
         }
     };

@@ -54,17 +54,23 @@ export default function Home() {
         setMessages(prev => [...prev, {text, isUser, isError}]);
     };
 
+    // State for conversation history
+    const [conversationHistory, setConversationHistory] = useState<{ role: string, content: string }[]>([]);
+
     // Get response from GPT API
     const getGPTResponse = useCallback(async (userText: string) => {
         try {
             setStatus("Thinking...");
             setIsLoading(true);
 
-            console.log("Sending request to /api/gpt");
+            console.log("Sending request to /api/gpt with conversation history");
             const res = await fetch("/api/gpt", {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({text: userText})
+                body: JSON.stringify({
+                    text: userText,
+                    conversationHistory: conversationHistory
+                })
             });
 
             if (!res.ok) {
@@ -73,6 +79,13 @@ export default function Home() {
 
             console.log("Received response from /api/gpt");
             const data = await res.json();
+
+            // Update conversation history with the new message history
+            if (data.conversationHistory) {
+                console.log("Updating conversation history, new length:", data.conversationHistory.length);
+                setConversationHistory(data.conversationHistory);
+            }
+            
             addMessage(data.response, false);
             setStatus("Playing audio response...");
             await playTTS(data.response);
@@ -85,7 +98,7 @@ export default function Home() {
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [conversationHistory]);
 
     useEffect(() => {
         // Only add the initial message once

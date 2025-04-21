@@ -1,0 +1,13 @@
+[project]
+name = "mother"
+version = "0.1.0"
+description = "Wire Mother - A voice conversation app using Pipecat"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pipecat-ai[openai,silero,elevenlabs]==0.0.63",
+    "openai",
+    "python-dotenv",
+    "dotenv>=0.9.9",
+    "pyaudio>=0.2.14",
+]

@@ -54,7 +54,7 @@ export async function POST(request: Request) {
         try {
             console.log("Starting OpenAI API call with", messages.length, "messages");
             const completion = await openai.chat.completions.create({
-                model: "gpt-4.5-preview-2025-02-27",  // Use a stable model
+                model: "gpt-4.1",  // Use a stable model
                 messages: messages
             });
 

@@ -84,13 +84,16 @@ class SlideProjectorController:
         """Raise an error if the projector is not connected"""
         ...
 
-    async def move_carousel(self, slides: int = 1) -> None:
+    async def move_carousel(self, slides: int = 1, delay_ms: int = 0) -> None:
         """Move the carousel by the specified number of slides
 
         Parameters
         ----------
         slides : int, default 1
             The number of slides to move. Negative numbers move backwards.
+        delay_ms : int, default 0
+            Delay between slides, in milliseconds. This is in addition to the time
+            required to move the carousel.
         """
         ...
 

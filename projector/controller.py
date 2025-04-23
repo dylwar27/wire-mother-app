@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import StrEnum, auto
-from typing import Any, Callable, Literal, Optional
+from typing import Any, Callable, Optional
 
 
 class SlideProjectorController:
@@ -84,67 +84,25 @@ class SlideProjectorController:
         """Raise an error if the projector is not connected"""
         ...
 
-    async def is_powered_on(self) -> bool:
-        """Check if the projector is powered on
-
-        Returns
-        -------
-        bool
-            True if the projector is powered on, False otherwise.
-        """
-        ...
-
-    async def turn_on(self) -> None:
-        """Turn on the projector"""
-        ...
-
-    async def turn_off(self) -> None:
-        """Turn off the projector"""
-        ...
-
-    async def move_carousel(self, slides: int = 1) -> None:
+    async def move_carousel(self, slides: int = 1, delay_ms: int = 0) -> None:
         """Move the carousel by the specified number of slides
 
         Parameters
         ----------
         slides : int, default 1
             The number of slides to move. Negative numbers move backwards.
-        """
-        ...
-
-    async def half_cycle(self, hold_ms: int) -> None:
-        """Perform a half cycle operation, as if the select button was held
-
-        Parameters
-        ----------
-        hold_ms : int
-            The duration to hold the half cycle, in milliseconds.
-        """
-        ...
-
-    async def remote_focus(
-        self, direction: Literal["in", "out"], hold_ms: int
-    ) -> None:
-        """Focus the projector in the specified direction
-
-        Parameters
-        ----------
-        direction : {"in", "out"}
-            The direction to focus.
-        hold_ms : int
-            The duration to "hold" the focus button, in milliseconds.
+        delay_ms : int, default 0
+            Delay between slides, in milliseconds. This is in addition to the time
+            required to move the carousel.
         """
         ...
 
 
 class SlideProjectorButton(StrEnum):
-    FORWARD = auto()
-    REVERSE = auto()
-    SELECT = auto()
+    INTEGRATED_FORWARD = auto()
+    INTEGRATED_REVERSE = auto()
     REMOTE_FORWARD = auto()
     REMOTE_REVERSE = auto()
-    REMOTE_FOCUS_UP = auto()
-    REMOTE_FOCUS_DOWN = auto()
 
 
 @dataclass(frozen=True)
